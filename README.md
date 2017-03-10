@@ -21,8 +21,8 @@ hyper run --name buildkite-data -d -v /buildkite/builds -v /buildkite/secrets hy
 Secondly, add your agent token and SCM credentials to the secrets volume:
 
 ```shell
-hyper run -it --rm --volumes-from buildkite-data /buildkite bash
-echo 'token="<agent-token>"' > /buildkite/secrets/buildkite-agent.cfg'
+hyper run -it --rm --volumes-from buildkite-data bash
+echo 'token=<agent-token>' > /buildkite/secrets/buildkite-agent.cfg
 echo 'https://<user>:<pass>@scm.org' > /buildkite/secrets/git-credentials
 exit
 ```

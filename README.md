@@ -1,6 +1,8 @@
 # hyper-buildkite-agent
 
-A docker-enabled [Buildkite](https://buildkite.com/) Agent that runs on [hyper.sh](https://hyper.sh/)
+A docker-enabled [Buildkite](https://buildkite.com/) Agent that runs on [hyper.sh](https://hyper.sh/).
+
+Usage:
 
 ```shell
 hyper run --rm toolmantim/hyper-buildkite-agent start --token 'xxx'

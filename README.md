@@ -43,12 +43,12 @@ To cache git checkouts effectively you need to mount a persistent volume to `/bu
 
 ### `/buildkite/secrets`
 
-Rather than using insecure environment variables or command line arguments you should store secrets, such as the agent token or SCM credentials, in a persistent volume mounted to `/buildkite/secrets`.
+Rather than using insecure environment variables or command line arguments you should store secrets in a persistent volume mounted to `/buildkite/secrets`.
 
-Files:
+Secret files that are automatically read and used by the agent:
 
-* `/buildkite/secrets/buildkite-agent.cfg` - a Buildkite Agent config file containing a Buildkite agent token, and any other settings.
-* `/buildkite/secrets/git-credentials` - a [git credentials file](https://git-scm.com/docs/git-credential-store#_storage_format) that will be used by git when cloning private https repositories.
+* `/buildkite/secrets/buildkite-agent.cfg` - [Buildkite Agent config file](https://buildkite.com/docs/agent/configuration) containing the agent token and any other agent settings you wish.
+* `/buildkite/secrets/git-credentials` - [git credentials file](https://git-scm.com/docs/git-credential-store#_storage_format) to be used by git when cloning private https repositories (e.g. `https://<user>:<token>@github.com`)
 
 ## Credits
 

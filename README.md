@@ -10,7 +10,7 @@ hyper run --rm toolmantim/hyper-buildkite-agent start
 
 ## Secure token and git credential storage
 
-You can store the Buildkite Agent token and [git credentials](https://git-scm.com/docs/git-credential-store#_storage_format) in a container volume, and mount them into the container, rather than using insecure environment variables.
+You can store the [Buildkite Agent config](https://buildkite.com/docs/agent/configuration) and [git credentials](https://git-scm.com/docs/git-credential-store#_storage_format) in a container volume, and mount them into the container, rather than using insecure environment variables.
 
 To do this you'll need to first create the secrets container:
 
@@ -33,7 +33,7 @@ Now you can start an agent, mounting the `/buildkite-agent-secrets` volume into 
 hyper run --rm --volumes-from buildkite-agent-secrets toolmantim/hyper-buildkite-agent start
 ```
 
-The agent should start up using the token from the `buildkite-agent.cfg` file, and be able to clone from private repositories based on the `git-credentials` file.
+The agent should now start using the token from `buildkite-agent.cfg`, and be able to clone private repositories using the credentials in `git-credentials`.
 
 ## Credits
 

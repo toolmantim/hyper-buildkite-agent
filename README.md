@@ -21,7 +21,7 @@ hyper run --name buildkite-data -d -v /buildkite/builds -v /buildkite/secrets hy
 Secondly, add your agent token and SCM credentials to the secrets volume:
 
 ```shell
-hyper run -it --rm --volumes-from buildkite-data --workdir /buildkite bash
+hyper run -it --rm --volumes-from buildkite-data /buildkite bash
 echo 'token="<agent-token>"' > /buildkite/secrets/buildkite-agent.cfg'
 echo 'https://<user>:<pass>@scm.org' > /buildkite/secrets/git-credentials
 exit
@@ -30,7 +30,7 @@ exit
 Finally, start an agent:
 
 ```shell
-hyper run -d --rm --volumes-from buildkite-data toolmantim/hyper-buildkite-agent start
+hyper run -it --rm --volumes-from buildkite-data toolmantim/hyper-buildkite-agent start
 ```
 
 You should now see the agent connected in Buildkite, and can successfully run a build (using Docker Compose if you like) of a private repository.

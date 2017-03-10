@@ -5,35 +5,50 @@ A [Buildkite](https://buildkite.com/) Agent that runs on [hyper.sh](https://hype
 Usage:
 
 ```shell
-hyper run --rm toolmantim/hyper-buildkite-agent start
+hyper run -it --rm toolmantim/hyper-buildkite-agent start
 ```
 
-## Secure token and git credential storage
+## Getting started
 
-You can store the [Buildkite Agent config](https://buildkite.com/docs/agent/configuration) and [git credentials](https://git-scm.com/docs/git-credential-store#_storage_format) in a container volume, and mount them into the container, rather than using insecure environment variables.
+To get started you'll need a builds volume to cache git checkouts, and a secrets volume for storing the agent token and git credentials.
 
-To do this you'll need to first create the secrets container:
+Firstly, create a builds container volume:
 
 ```shell
-hyper run --name buildkite-agent-secrets -d -v /buildkite-agent-secrets hyperhq/nfs-server
+hyper run --name buildkite-data -d -v /buildkite/builds -v /buildkite/secrets hyperhq/nfs-server
 ```
 
-Enter the container and add in any credentials:
+Secondly, add your agent token and SCM credentials to the secrets volume:
 
 ```shell
-hyper exec -it secrets-container-id bash
-vi /buildkite-agent-secrets/buildkite-agent.cfg
-vi /buildkite-agent-secrets/git-credentials
+hyper run -it --rm --volumes-from buildkite-data --workdir /buildkite bash
+echo 'token="<agent-token>"' > /buildkite/secrets/buildkite-agent.cfg'
+echo 'https://<user>:<pass>@scm.org' > /buildkite/secrets/git-credentials
 exit
 ```
 
-Now you can start an agent, mounting the `/buildkite-agent-secrets` volume into it:
+Finally, start an agent:
 
-```
-hyper run --rm --volumes-from buildkite-agent-secrets toolmantim/hyper-buildkite-agent start
+```shell
+hyper run -d --rm --volumes-from buildkite-data toolmantim/hyper-buildkite-agent start
 ```
 
-The agent should now start using the token from `buildkite-agent.cfg`, and be able to clone private repositories using the credentials in `git-credentials`.
+You should now see the agent connected in Buildkite, and can successfully run a build (using Docker Compose if you like) of a private repository.
+
+## Volumes
+
+### `/buildkite/builds`
+
+To cache git checkouts effectively you need to mount a persistent volume to `/buildkite/builds`.
+
+### `/buildkite/secrets`
+
+Rather than using insecure environment variables or command line arguments you should store secrets, such as the agent token or SCM credentials, in a persistent volume mounted to `/buildkite/secrets`.
+
+Files:
+
+* `/buildkite/secrets/buildkite-agent.cfg` - a Buildkite Agent config file containing a Buildkite agent token, and any other settings.
+* `/buildkite/secrets/git-credentials` - a [git credentials file](https://git-scm.com/docs/git-credential-store#_storage_format) that will be used by git when cloning private https repositories.
 
 ## Credits
 

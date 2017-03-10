@@ -27,7 +27,7 @@ echo 'https://<user>:<pass>@scm.org' > /buildkite/secrets/git-credentials
 exit
 ```
 
-Finally, start an agent:
+Now you can start an agent:
 
 ```shell
 hyper run -it --rm --volumes-from buildkite-data toolmantim/hyper-buildkite-agent start

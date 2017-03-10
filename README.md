@@ -1,6 +1,6 @@
 # hyper-buildkite-agent
 
-A docker-enabled [Buildkite](https://buildkite.com/) Agent that runs on [hyper.sh](https://hyper.sh/).
+A [Buildkite](https://buildkite.com/) Agent that runs on [hyper.sh](https://hyper.sh/). It ships with a running Docker daemon so you're able to build docker images and use Docker Compose for testing.
 
 Usage:
 
@@ -14,14 +14,14 @@ You can store the [Buildkite Agent config](https://buildkite.com/docs/agent/conf
 
 To do this you'll need to first create the secrets container:
 
-```
+```shell
 hyper run --name buildkite-agent-secrets -d -v /buildkite-agent-secrets hyperhq/nfs-server
 ```
 
 Enter the container and add in any credentials:
 
-```
-hyper exec <secrets-container-id> bash
+```shell
+hyper exec -it secrets-container-id bash
 vi /buildkite-agent-secrets/buildkite-agent.cfg
 vi /buildkite-agent-secrets/git-credentials
 exit

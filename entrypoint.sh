@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# Copied from https://github.com/ptptptptptpt/docker-in-hyper/blob/master/Dockerfile
-
 # Mount the required cgroups
 mkdir -p /cgroup/memory && mount -t cgroup -o rw,nosuid,nodev,noexec,relatime,memory cgroup /cgroup/memory
 mkdir -p /cgroup/cpuset && mount -t cgroup -o rw,nosuid,nodev,noexec,relatime,cpuset cgroup /cgroup/cpuset
@@ -15,5 +13,15 @@ mkdir -p /cgroup/pids && mount -t cgroup -o rw,nosuid,nodev,noexec,relatime,pids
 
 # Start Docker
 dockerd --host=unix:///var/run/docker.sock > /var/log/docker.log 2>&1 &
+
+# Read agent config (w/ token) from /buildkite-agent-secrets
+if [[ -f /buildkite-agent-secrets/buildkite-agent.cfg ]]; then
+  export BUILDKITE_AGENT_CONFIG=/buildkite-agent-secrets/buildkite-agent.cfg
+fi
+
+# Read git https auth info from /buildkite-agent-secrets
+if [[ -f /buildkite-agent-secrets/git-credentials ]]; then
+  git config --global credential.helper "store --file=/buildkite-agent-secrets/git-credentials"
+fi
 
 exec "$@"

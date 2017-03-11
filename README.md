@@ -8,6 +8,11 @@ Usage:
 hyper run -it --rm toolmantim/hyper-buildkite-agent start
 ```
 
+See also:
+
+* [hyper-buildkite-agent-scheduler](https://github.com/toolmantim/hyper-buildkite-agent-scheduler)
+* [hyper-buildkite-agent-runner](https://github.com/toolmantim/hyper-buildkite-agent-runner)
+
 ## Getting started
 
 To get started you'll need a builds volume to cache git checkouts, and a secrets volume for storing the agent token and git credentials.

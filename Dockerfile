@@ -4,6 +4,8 @@ VOLUME /var/lib/docker
 VOLUME /buildkite/builds
 VOLUME /buildkite/secrets
 
+ENV DOCKER=true
+
 RUN apk add --no-cache \
 	e2fsprogs \
 	iptables

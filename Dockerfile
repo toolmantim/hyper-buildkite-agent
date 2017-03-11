@@ -1,8 +1,6 @@
 FROM buildkite/agent:3
 
 VOLUME /var/lib/docker
-VOLUME /buildkite/builds
-VOLUME /buildkite/secrets
 
 ENV DOCKER=true
 

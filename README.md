@@ -20,15 +20,15 @@ To get started you'll need a builds volume to cache git checkouts, and a secrets
 Firstly, create a `buildkite-data` container with volumes for builds and secrets:
 
 ```shell
-hyper run --name buildkite-data -d -v /buildkite/builds -v /buildkite/secrets hyperhq/nfs-server
+hyper run --name buildkite-data -d -v /buildkite-builds -v /buildkite-secrets hyperhq/nfs-server
 ```
 
 Secondly, add your agent token and SCM credentials to the secrets volume:
 
 ```shell
 hyper run -it --rm --volumes-from buildkite-data bash
-echo 'token=<agent-token>' > /buildkite/secrets/buildkite-agent.cfg
-echo 'https://<user>:<pass>@scm.org' > /buildkite/secrets/git-credentials
+echo 'token=<agent-token>' > /buildkite-secrets/buildkite-agent.cfg
+echo 'https://<user>:<pass>@scm.org' > /buildkite-secrets/git-credentials
 exit
 ```
 
@@ -42,18 +42,18 @@ You should now see the agent connected in Buildkite, and can successfully run a 
 
 ## Volumes
 
-### `/buildkite/builds`
+### `/buildkite-builds`
 
-To cache git checkouts effectively you need to mount a persistent volume to `/buildkite/builds`.
+To cache git checkouts effectively you need to mount a persistent volume to `/buildkite-builds`.
 
-### `/buildkite/secrets`
+### `/buildkite-secrets`
 
-Instead of using insecure environment variables, or command line arguments, you should store secrets in a persistent volume mounted to `/buildkite/secrets`.
+Instead of using insecure environment variables, or command line arguments, you should store secrets in a persistent volume mounted to `/buildkite-secrets`.
 
 Secrets files that are automatically read and used by the agent:
 
-* `/buildkite/secrets/buildkite-agent.cfg` - [Buildkite Agent config file](https://buildkite.com/docs/agent/configuration) containing the agent token and any other agent settings you wish.
-* `/buildkite/secrets/git-credentials` - [git credentials file](https://git-scm.com/docs/git-credential-store#_storage_format) to be used by git when cloning private https repositories (e.g. `https://<user>:<token>@github.com`)
+* `/buildkite-secrets/buildkite-agent.cfg` - [Buildkite Agent config file](https://buildkite.com/docs/agent/configuration) containing the agent token and any other agent settings you wish.
+* `/buildkite-secrets/git-credentials` - [git credentials file](https://git-scm.com/docs/git-credential-store#_storage_format) to be used by git when cloning private https repositories (e.g. `https://<user>:<token>@github.com`)
 
 You can also add any other secrets that you want to make available to your agents.
 

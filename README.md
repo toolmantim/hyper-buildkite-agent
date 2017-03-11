@@ -12,7 +12,7 @@ hyper run -it --rm toolmantim/hyper-buildkite-agent start
 
 To get started you'll need a builds volume to cache git checkouts, and a secrets volume for storing the agent token and git credentials.
 
-Firstly, create a builds container volume:
+Firstly, create a `buildkite-data` container with volumes for builds and secrets:
 
 ```shell
 hyper run --name buildkite-data -d -v /buildkite/builds -v /buildkite/secrets hyperhq/nfs-server

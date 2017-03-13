@@ -37,6 +37,8 @@ You should now see the agent connected in Buildkite, and can successfully run a 
 
 ## Scheduler mode
 
+(Note: Scheduler mode doesn't quite work yet)
+
 You can run your build jobs completely on-demand by running an agent in scheduler mode. This scheduler agent will spin up Hyper containers on demand for each job, allowing per-second CI billing for jobs, and the ability to run as many parallel jobs as your container quota allows.
 
 To start the scheduler, add your hyper login credentials to the secrets volume:
@@ -53,10 +55,14 @@ exit
 Now start a scheduler agent by setting the `HYPER_SCHEDULER=true` environment variable:
 
 ```
-hyper run -d --volumes-from buildkite-data --name buildkite-job-scheduler -e HYPER_SCHEDULER=true toolmantim/hyper-buildkite-agent start --meta-data "queue=hyper"
+hyper run -d --size=S2 --volumes-from buildkite-data --name buildkite-job-scheduler -e HYPER_SCHEDULER=true toolmantim/hyper-buildkite-agent start --meta-data "queue=hyper" --name "hyper-scheduler-%n"
 ```
 
 Now you can run Buildkite jobs targeting the scheduler (e.g. `queue=hyper`) and they'll be run and rescheduled on-demand to be run in one-off Hyper containers.
+
+Configuration environment variables for the scheduler mode agent:
+
+* `HYPER_RUNNER_SIZE` - The [Hyper.sh container size](https://hyper.sh/pricing.html) for your job runners. Default: `"S4"`
 
 ## Volumes
 

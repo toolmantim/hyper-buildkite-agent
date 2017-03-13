@@ -26,6 +26,7 @@ COPY buildkite-agent-bootstrap.sh /buildkite/hyper-bootstrap
 COPY buildkite-agent-post-command.sh /buildkite/hooks/post-command
 
 ENV HYPER_SCHEDULER="false"
+ENV HYPER_RUNNER_SIZE="S4"
 
 ENV BUILDKITE_AGENT_NAME="hyper-agent-%n"
 ENV BUILDKITE_BUILD_PATH="/buildkite-builds"

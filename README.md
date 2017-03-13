@@ -15,22 +15,41 @@ To get started you'll need a builds volume to cache git checkouts and secrets.
 Firstly, create a `buildkite-data` container with volumes for builds and secrets:
 
 ```shell
-hyper run --name buildkite-data -d -v /buildkite-builds -v /buildkite-secrets hyperhq/nfs-server
+hyper run \
+  --name buildkite-data \
+  -d \
+  -v /buildkite-builds \
+  -v /buildkite-secrets \
+  hyperhq/nfs-server
 ```
 
-Secondly, add your agent token and SCM credentials to the secrets volume:
+Secondly, to add your secrets to the new volume, start a one-off container with the volumes mounted within it:
 
 ```shell
-hyper run -it --rm --volumes-from buildkite-data --entrypoint bash toolmantim/hyper-buildkite-agent
+hyper run \
+  -it \
+  --rm \
+  --volumes-from buildkite-data \
+  --entrypoint bash \
+  toolmantim/hyper-buildkite-agent
+```
+
+Inside this container, add your agent token and SCM credentials:
+
+```shell
 echo 'token=<agent-token>' > /buildkite-secrets/buildkite-agent.cfg
 echo 'https://<user>:<pass>@scm.org' > /buildkite-secrets/git-credentials
 exit
 ```
 
-Now you can start an agent:
+Now that you've set up the secrets you can start your agent:
 
 ```shell
-hyper run -it --rm --volumes-from buildkite-data toolmantim/hyper-buildkite-agent start
+hyper run \
+  -it \
+  --rm \
+  --volumes-from buildkite-data \
+  toolmantim/hyper-buildkite-agent start
 ```
 
 You should now see the agent connected in Buildkite, and can successfully run a build (using Docker Compose if you like) of a private repository.
@@ -52,7 +71,14 @@ exit
 Now start a scheduler agent by setting the `HYPER_SCHEDULER=true` environment variable (it can run in an S2-sized container, at US$1.55/month):
 
 ```
-hyper run -d --size=S2 --volumes-from buildkite-data --name buildkite-job-scheduler -e HYPER_SCHEDULER=true toolmantim/hyper-buildkite-agent start --meta-data "queue=hyper" --name "hyper-scheduler-%n"
+hyper run -d \
+  --size=S2 \
+  --volumes-from buildkite-data \
+  --name buildkite-job-scheduler \
+  -e HYPER_SCHEDULER=true \
+  toolmantim/hyper-buildkite-agent start \
+    --meta-data "queue=hyper" \
+    --name "hyper-scheduler-%n"
 ```
 
 Now you can run Buildkite jobs targeting the scheduler (e.g. `queue=hyper`) and they'll be re-run in one-off runner containers.

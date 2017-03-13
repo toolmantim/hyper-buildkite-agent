@@ -8,14 +8,9 @@ Usage:
 hyper run -it --rm toolmantim/hyper-buildkite-agent start
 ```
 
-See also:
-
-* [hyper-buildkite-agent-scheduler](https://github.com/toolmantim/hyper-buildkite-agent-scheduler)
-* [hyper-buildkite-agent-runner](https://github.com/toolmantim/hyper-buildkite-agent-runner)
-
 ## Getting started
 
-To get started you'll need a builds volume to cache git checkouts, and a secrets volume for storing the agent token and git credentials.
+To get started you'll need a builds volume to cache git checkouts and secrets.
 
 Firstly, create a `buildkite-data` container with volumes for builds and secrets:
 
@@ -40,6 +35,35 @@ hyper run -it --rm --volumes-from buildkite-data toolmantim/hyper-buildkite-agen
 
 You should now see the agent connected in Buildkite, and can successfully run a build (using Docker Compose if you like) of a private repository.
 
+## Scheduler mode
+
+(Note: Scheduler mode doesn't quite work yet)
+
+You can run your build jobs completely on-demand by running an agent in scheduler mode. This scheduler agent will spin up Hyper containers on demand for each job, allowing per-second CI billing for jobs, and the ability to run as many parallel jobs as your container quota allows.
+
+To start the scheduler, add your hyper login credentials to the secrets volume:
+
+```shell
+# Start a container
+hyper run -it --rm --volumes-from buildkite-data --entrypoint bash toolmantim/hyper-buildkite-agent
+# In the container, do a hyper login
+hyper --config /buildkite-secrets/hyper config
+# Exit the container
+exit
+```
+
+Now start a scheduler agent by setting the `HYPER_SCHEDULER=true` environment variable:
+
+```
+hyper run -d --size=S2 --volumes-from buildkite-data --name buildkite-job-scheduler -e HYPER_SCHEDULER=true toolmantim/hyper-buildkite-agent start --meta-data "queue=hyper" --name "hyper-scheduler-%n"
+```
+
+Now you can run Buildkite jobs targeting the scheduler (e.g. `queue=hyper`) and they'll be run and rescheduled on-demand to be run in one-off Hyper containers.
+
+Configuration environment variables for the scheduler mode agent:
+
+* `HYPER_RUNNER_SIZE` - The [Hyper.sh container size](https://hyper.sh/pricing.html) for your job runners. Default: `"S4"`
+
 ## Volumes
 
 ### `/buildkite-builds`
@@ -54,6 +78,7 @@ Secrets files that are automatically read and used by the agent:
 
 * `/buildkite-secrets/buildkite-agent.cfg` - [Buildkite Agent config file](https://buildkite.com/docs/agent/configuration) containing the agent token and any other agent settings you wish.
 * `/buildkite-secrets/git-credentials` - [git credentials file](https://git-scm.com/docs/git-credential-store#_storage_format) to be used by git when cloning private https repositories (e.g. `https://<user>:<token>@github.com`)
+* `/buildkite-secrets/hyper/config.json` - [hyper.sh cli](https://git-scm.com/docs/git-credential-store#_storage_format) credentials, when used in scheduler mode.
 
 You can also add any other secrets that you want to make available to your agents.
 

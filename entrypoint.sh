@@ -1,7 +1,18 @@
 #!/bin/bash
 
-if [[ "${DOCKER:-false}" == "true" ]]; then
-  # Mount the required cgroups
+# Read agent config (w/ token) from /buildkite-agent-secrets
+if [[ -f /buildkite-secrets/buildkite-agent.cfg ]]; then
+  export BUILDKITE_AGENT_CONFIG=/buildkite-secrets/buildkite-agent.cfg
+fi
+
+# Schedulers don't need Docker or git access
+if [[ "${HYPER_SCHEDULER}" != "true" ]]; then
+  # Read git https auth info from /buildkite-agent-secrets
+  if [[ -f /buildkite-secrets/git-credentials ]]; then
+    git config --global credential.helper "store --file=/buildkite-secrets/git-credentials"
+  fi
+
+  # Mount the required cgroups for Docker
   mkdir -p /cgroup/memory && mount -t cgroup -o rw,nosuid,nodev,noexec,relatime,memory cgroup /cgroup/memory
   mkdir -p /cgroup/cpuset && mount -t cgroup -o rw,nosuid,nodev,noexec,relatime,cpuset cgroup /cgroup/cpuset
   mkdir -p /cgroup/cpu,cpuacct && mount -t cgroup -o rw,nosuid,nodev,noexec,relatime,cpu,cpuacct cgroup /cgroup/cpu,cpuacct
@@ -14,16 +25,6 @@ if [[ "${DOCKER:-false}" == "true" ]]; then
 
   # Start Docker
   dockerd --host=unix:///var/run/docker.sock > /var/log/docker.log 2>&1 &
-fi
-
-# Read agent config (w/ token) from /buildkite-agent-secrets
-if [[ -f /buildkite-secrets/buildkite-agent.cfg ]]; then
-  export BUILDKITE_AGENT_CONFIG=/buildkite-secrets/buildkite-agent.cfg
-fi
-
-# Read git https auth info from /buildkite-agent-secrets
-if [[ -f /buildkite-secrets/git-credentials ]]; then
-  git config --global credential.helper "store --file=/buildkite-secrets/git-credentials"
 fi
 
 exec "$@"

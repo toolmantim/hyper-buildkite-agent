@@ -12,7 +12,7 @@ if [[ "${HYPER_SCHEDULER}" == "true" ]]; then
     -d \
     --volumes-from buildkite-data \
     -e "BUILDKITE_AGENT_EXIT_AFTER_JOB=true" \
-    toolmantim/hyper-buildkite-agent:add-scheduler-support \
+    toolmantim/hyper-buildkite-agent \
     start \
     --meta-data "queue=hyper-job:${BUILDKITE_JOB_ID}" \
     --name "hyper-runner-%n"

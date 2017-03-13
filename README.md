@@ -21,7 +21,7 @@ hyper run --name buildkite-data -d -v /buildkite-builds -v /buildkite-secrets hy
 Secondly, add your agent token and SCM credentials to the secrets volume:
 
 ```shell
-hyper run -it --rm --volumes-from buildkite-data bash
+hyper run -it --rm --volumes-from buildkite-data --entrypoint bash toolmantim/hyper-buildkite-agent
 echo 'token=<agent-token>' > /buildkite-secrets/buildkite-agent.cfg
 echo 'https://<user>:<pass>@scm.org' > /buildkite-secrets/git-credentials
 exit
@@ -39,26 +39,23 @@ You should now see the agent connected in Buildkite, and can successfully run a 
 
 (Note: Scheduler mode doesn't quite work yet)
 
-You can run your build jobs completely on-demand by running an agent in scheduler mode. This scheduler agent will spin up Hyper containers on demand for each job, allowing per-second CI billing for jobs, and the ability to run as many parallel jobs as your container quota allows.
+You can run build jobs in on-demand Hyper containers by running an agent in scheduler mode. This agent will spin up a Hyper container for each job on its own queue, and will exit after it completes the job. This means you get per-second billing for jobs, and the ability to run as many parallel jobs as your container quota allows.
 
 To start the scheduler, add your hyper login credentials to the secrets volume:
 
 ```shell
-# Start a container
 hyper run -it --rm --volumes-from buildkite-data --entrypoint bash toolmantim/hyper-buildkite-agent
-# In the container, do a hyper login
 hyper --config /buildkite-secrets/hyper config
-# Exit the container
 exit
 ```
 
-Now start a scheduler agent by setting the `HYPER_SCHEDULER=true` environment variable:
+Now start a scheduler agent by setting the `HYPER_SCHEDULER=true` environment variable (it can run in an S2-sized container, at US$1.55/month):
 
 ```
 hyper run -d --size=S2 --volumes-from buildkite-data --name buildkite-job-scheduler -e HYPER_SCHEDULER=true toolmantim/hyper-buildkite-agent start --meta-data "queue=hyper" --name "hyper-scheduler-%n"
 ```
 
-Now you can run Buildkite jobs targeting the scheduler (e.g. `queue=hyper`) and they'll be run and rescheduled on-demand to be run in one-off Hyper containers.
+Now you can run Buildkite jobs targeting the scheduler (e.g. `queue=hyper`) and they'll be re-run in one-off runner containers.
 
 Configuration environment variables for the scheduler mode agent:
 
@@ -85,6 +82,10 @@ You can also add any other secrets that you want to make available to your agent
 ## Credits
 
 * Builds upon [ptptptptptpt/docker-in-hyper](https://github.com/ptptptptptpt/docker-in-hyper)
+
+## Roadmap
+
+* Scheduler configuration support for adding additional runner volume mounts
 
 ## License
 
